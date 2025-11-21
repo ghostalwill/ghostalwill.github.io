@@ -3,93 +3,167 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Bot</title>
+  <title>AI Chatbot</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    header {
-      background: #4a4aff;
-      color: white;
-      padding: 20px;
-      text-align: center;
-      font-size: 28px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
+
+    .chat-container {
+      width: 90%;
+      max-width: 600px;
+      height: 80vh;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-    #chatbox {
-      width: 100%;
-      height: 300px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 10px;
-      overflow-y: auto;
-      margin-bottom: 20px;
-      background: #fafafa;
-    }
-    #userInput {
-      width: 80%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    #sendBtn {
-      padding: 10px 20px;
-      border: none;
-      background: #4a4aff;
+
+    .header {
+      background: #10a37f;
       color: white;
-      border-radius: 8px;
+      text-align: center;
+      padding: 15px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #chatbox {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f7f7f8;
+    }
+
+    .bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      font-size: 15px;
+      animation: fadeIn 0.15s ease-in;
+    }
+
+    .user {
+      background: #10a37f;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 0;
+    }
+
+    .bot {
+      background: #e5e5e5;
+      color: #333;
+      border-bottom-left-radius: 0;
+    }
+
+    .input-area {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+
+    #userInput {
+      flex-grow: 1;
+      padding: 15px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+    }
+
+    #sendBtn {
+      width: 100px;
+      border: none;
+      background: #10a37f;
+      color: white;
+      font-size: 15px;
       cursor: pointer;
     }
+
     #sendBtn:hover {
-      background: #2d2de0;
+      background: #0d8a6b;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <header>My AI Bot</header>
 
-  <div class="container">
-    <div id="chatbox"></div>
-
-    <input id="userInput" type="text" placeholder="Say something..." />
+<div class="chat-container">
+  <div class="header">AI Chat</div>
+  <div id="chatbox"></div>
+  <div class="input-area">
+    <input id="userInput" type="text" placeholder="Send a message..." />
     <button id="sendBtn" onclick="sendMessage()">Send</button>
   </div>
+</div>
 
 <script>
-  function sendMessage() {
+  async function sendMessage() {
     const input = document.getElementById('userInput');
     const chatbox = document.getElementById('chatbox');
     const text = input.value.trim();
 
     if (text === '') return;
 
-    const userBubble = document.createElement('div');
-    userBubble.textContent = "You: " + text;
-    chatbox.appendChild(userBubble);
-
+    addBubble(text, 'user');
     input.value = '';
 
-    // Fake AI response
-    setTimeout(() => {
-      const botBubble = document.createElement('div');
-      botBubble.textContent = "AI: " + generateResponse(text);
-      chatbox.appendChild(botBubble);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }, 500);
+    // AI reply bubble placeholder
+    addBubble('Thinking...', 'bot', true);
+
+    const reply = await getAIResponse(text);
+
+    // Replace "Thinking..." with real response
+    const thinkingBubble = document.querySelector('.bot.typing');
+    if (thinkingBubble) thinkingBubble.remove();
+
+    addBubble(reply, 'bot');
   }
 
-  function generateResponse(text) {
-    return "You said: '" + text + "'. That's interesting!";
+  function addBubble(text, type, typing = false) {
+    const chatbox = document.getElementById('chatbox');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ' + type;
+    if (typing) bubble.classList.add('typing');
+    bubble.textContent = text;
+    chatbox.appendChild(bubble);
+    chatbox.scrollTop = chatbox.scrollHeight;
+  }
+
+  async function getAIResponse(message) {
+    try {
+      // REAL API CALL — replace YOUR_API_KEY_HERE
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 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'
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: message }]
+        })
+      });
+
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    } catch (err) {
+      return "Error: Unable to reach AI server.";
+    }
   }
 </script>
+
 </body>
 </html>
